@@ -65,10 +65,14 @@
     },
     {
       "id": 5,
-      "title": "HTTP error rate (5xx)",
+      "title": "HTTP error rate (4xx / 5xx)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
       "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"4..\"}[1m]))",
+          "legendFormat": "4xx/sec"
+        },
         {
           "expr": "sum(rate(http_requests_total{status=~\"5..\"}[1m]))",
           "legendFormat": "5xx/sec"
