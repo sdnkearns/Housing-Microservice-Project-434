@@ -10,8 +10,6 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  # Runs on every push and PR — catches broken builds before anything is
-  # published or deployed.
   build-test:
     runs-on: ubuntu-latest
     steps:
@@ -30,8 +28,6 @@ jobs:
       - name: Build
         run: go build ./...
 
-  # Builds the Docker image and pushes it to GitHub Container Registry.
-  # Only runs on pushes to main, not on PRs (PRs just get build-test).
   build-and-push:
     needs: build-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -43,6 +39,9 @@ jobs:
       image: ${{ steps.vars.outputs.image }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -67,9 +66,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # Deploys to the EC2 "production" environment. Add required reviewers to
-  # the "production" environment in repo Settings > Environments if you want
-  # a manual approval gate before this runs.
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
